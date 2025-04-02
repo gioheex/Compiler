@@ -2,6 +2,8 @@
 #include <string.h>
 #include "helpers/vector.h"
 #include "helpers/buffer.h"
+#include  <assert.h>
+
 
 #define LEX_GETC_IF(buffer, c, exp)     \
     for (c = peekc(); exp; c = peekc()) \
@@ -49,6 +51,8 @@ static struct token* lexer_last_token() {
     return vector_back_or_null(lex_process->token_vec);
 }
 
+static struct token* read_next_token();
+
 static struct token* handle_whitespace() {
     struct token* last_token = lexer_last_token();
     if (last_token) {
@@ -58,6 +62,7 @@ static struct token* handle_whitespace() {
     return read_next_token();
 }
 
+
 const char* read_number_str() {
     const char* num = NULL;
     struct buffer* buffer = buffer_create();
@@ -65,7 +70,11 @@ const char* read_number_str() {
     LEX_GETC_IF(buffer, c, (c >= '0' && c <= '9'));
     // Finaliza a string
     buffer_write(buffer, 0x00);
+    
+    printf("Token: %s\n", buffer->data);
+    
     return buffer_ptr(buffer);
+
 }
 
 unsigned long long read_number() {
@@ -81,6 +90,24 @@ struct token* token_make_number() {
     return token_make_number_for_value(read_number());
 }
 
+struct token* token_make_string(char inicio, char fim) {
+    struct buffer* buf = buffer_create();
+    assert(nextc() == inicio);
+    char c = nextc();
+    
+    for (; c != inicio && c != EOF; c = nextc()){
+        if (c == '\\') {
+            continue;
+        }
+        buffer_write(buf, c);
+    }
+    
+
+    buffer_write(buf, 0x00);
+    printf("Token: %s\n", buf->data);
+    return token_create(&(struct token){.type=TOKEN_TYPE_STRING, .sval=buffer_ptr(buf)});
+} 
+
 struct token* read_next_token() {
     struct token* token = NULL;
     char c = peekc();
@@ -93,6 +120,10 @@ struct token* read_next_token() {
             token = token_make_number();
             break;
 
+        case '"':
+            token = token_make_string('"', '"');
+            break;
+
         case ' ':
         case '\t':
         case '\n':
@@ -103,8 +134,12 @@ struct token* read_next_token() {
             //compiler_error(lex_process->compiler, "Token inválido\n");
             break;
     }
+    
     return token;
+    
 }
+
+
 
 int lex(struct lex_process* process) {
     lex_process = process;
