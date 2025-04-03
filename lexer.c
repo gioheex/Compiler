@@ -108,6 +108,18 @@ struct token* token_make_string(char inicio, char fim) {
     return token_create(&(struct token){.type=TOKEN_TYPE_STRING, .sval=buffer_ptr(buf)});
 } 
 
+struct token* token_make_operator() {
+    struct buffer* bufa = buffer_create();
+    char c = peekc();
+    LEX_GETC_IF(bufa, c, (c >= '0' && c <= '9'));
+    // Finaliza a string
+    buffer_write(bufa, 0x00);
+    
+    printf("Token: %s\n", bufa->data);
+    
+    return buffer_ptr(bufa);
+}
+
 struct token* read_next_token() {
     struct token* token = NULL;
     char c = peekc();
@@ -122,6 +134,10 @@ struct token* read_next_token() {
 
         case '"':
             token = token_make_string('"', '"');
+            break;
+        
+        OPERATOR_CASE:
+            token = token_make_operator();
             break;
 
         case ' ':

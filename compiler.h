@@ -26,9 +26,26 @@ struct pos {
     case '9'
 
     enum {
-    LEXICAL_ANALYSIS_ALL_OK ,
-    LEXICAL_ANALYSIS_IMPUT_ERROR
-};
+        LEXICAL_ANALYSIS_ALL_OK ,
+        LEXICAL_ANALYSIS_IMPUT_ERROR
+    };
+
+#define OPERATOR_CASE \
+    case '+':  \
+    case '-':  \
+    case '*':  \
+    case '>':  \
+    case '<':  \
+    case '^':  \
+    case '%':  \
+    case '!':  \
+    case '=':  \
+    case '~':  \
+    case '|':  \
+    case '&':  \
+    case '(':  \
+    case '['
+
 
 enum {
     TOKEN_TYPE_KEYWORD ,
