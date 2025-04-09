@@ -125,7 +125,7 @@ struct token *token_make_string(char inicio, char fim)
 struct token* single_line_comment() {
 
     struct buffer* buf = buffer_create();
-    char c = "";
+    char *c = NULL;
 
     LEX_GETC_IF(buf, c, c != '\n' && c != EOF);
     buffer_write(buf, 0x00);
@@ -138,7 +138,7 @@ struct token* single_line_comment() {
 struct token* multi_line_comment(char estrela) {
 
     struct buffer* buf = buffer_create();
-    char c = "";
+    char *c = "";
 
     for (; c != estrela && c != EOF; c = nextc())
     {
