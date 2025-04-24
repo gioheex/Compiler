@@ -148,13 +148,13 @@ const char *read_number_str()
         char *stopstring;
         long l;
 
-        if (prox = 'x') {
+        if (prox == 'x') {
             LEX_GETC_IF(buff, prox, prox != ';');
             l = strtol(buff->data, &stopstring, 16);
             printf("%ld\n\n\n", l);
         }
 
-        else if (prox = 'b') {
+        else if (prox == 'b') {
             return 0;
         }
 
