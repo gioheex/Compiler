@@ -134,51 +134,117 @@ static struct token *handle_whitespace()
     return read_next_token();
 }
 
+// const char *read_number_str()
+// {
+//     const char *num = NULL;
+//     struct buffer *buffer = buffer_create();
+//     char c = peekc();
+
+//     if (c == '0')
+//     {
+//         char prox = nextc();
+//         prox = nextc();
+//         struct buffer *buff = buffer_create();
+//         char *stopstring;
+//         long l;
+
+//         if (prox == 'x') {
+//             LEX_GETC_IF(buff, prox, prox != ';');
+//             l = strtol(buff->data, &stopstring, 16);
+//             printf("%ld\n\n\n", l);
+//         }
+
+//         else if (prox == 'b') {
+//             return 0;
+//         }
+
+//         else {
+//             pushc(prox);
+//             pushc('0');
+//             LEX_GETC_IF(buffer, c, (c >= '0' && c <= '9'));
+//             // Finaliza a string
+//             buffer_write(buffer, 0x00);
+
+//             printf("Token: %s\n", buffer->data);
+
+//             return buffer_ptr(buffer);
+//         }
+//     }
+//     else {
+//         LEX_GETC_IF(buffer, c, (c >= '0' && c <= '9'));
+//         // Finaliza a string
+//         buffer_write(buffer, 0x00);
+
+//         printf("Token: %s\n", buffer->data);
+
+//         return buffer_ptr(buffer);
+//     }
+// }
+
 const char *read_number_str()
 {
-    const char *num = NULL;
     struct buffer *buffer = buffer_create();
     char c = peekc();
 
     if (c == '0')
     {
-        char prox = nextc();
-        prox = nextc();
-        struct buffer *buff = buffer_create();
-        char *stopstring;
-        long l;
+        nextc(); // consome '0'
+        char prefix = peekc();
 
-        if (prox == 'x') {
-            LEX_GETC_IF(buff, prox, prox != ';');
-            l = strtol(buff->data, &stopstring, 16);
-            printf("%ld\n\n\n", l);
-        }
-
-        else if (prox == 'b') {
-            return 0;
-        }
-
-        else {
-            pushc(prox);
-            pushc('0');
-            LEX_GETC_IF(buffer, c, (c >= '0' && c <= '9'));
-            // Finaliza a string
+        if (prefix == 'x' || prefix == 'X') // Hexadecimal
+        {
+            nextc(); // consome 'x'
+            LEX_GETC_IF(buffer, c, isxdigit(c));
             buffer_write(buffer, 0x00);
 
-            printf("Token: %s\n", buffer->data);
+            char *stopstring;
+            long value = strtol(buffer->data, &stopstring, 16);
 
-            return buffer_ptr(buffer);
+            // Converte para string decimal
+            struct buffer *dec_buffer = buffer_create();
+            char temp[32];
+            sprintf(temp, "%ld", value);
+            for (int i = 0; temp[i]; i++)
+                buffer_write(dec_buffer, temp[i]);
+            buffer_write(dec_buffer, 0x00);
+
+            return buffer_ptr(dec_buffer);
+        }
+        else if (prefix == 'b' || prefix == 'B') // Binário
+        {
+            nextc(); // consome 'b'
+            LEX_GETC_IF(buffer, c, c == '0' || c == '1');
+            buffer_write(buffer, 0x00);
+
+            char *stopstring;
+            long value = strtol(buffer->data, &stopstring, 2);
+
+            // Converte para string decimal
+            struct buffer *dec_buffer = buffer_create();
+            char temp[32];
+            sprintf(temp, "%ld", value);
+            for (int i = 0; temp[i]; i++)
+                buffer_write(dec_buffer, temp[i]);
+            buffer_write(dec_buffer, 0x00);
+
+            return buffer_ptr(dec_buffer);
+        }
+        else if (isdigit(prefix)) // Decimal com zero à esquerda
+        {
+            pushc(prefix);
+            pushc('0');
+        }
+        else
+        {
+            pushc(prefix);
+            pushc('0');
         }
     }
-    else {
-        LEX_GETC_IF(buffer, c, (c >= '0' && c <= '9'));
-        // Finaliza a string
-        buffer_write(buffer, 0x00);
 
-        printf("Token: %s\n", buffer->data);
-
-        return buffer_ptr(buffer);
-    }
+    // Número decimal padrão
+    LEX_GETC_IF(buffer, c, isdigit(c));
+    buffer_write(buffer, 0x00);
+    return buffer_ptr(buffer);
 }
 
 unsigned long long read_number()
