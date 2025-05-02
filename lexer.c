@@ -134,52 +134,14 @@ static struct token *handle_whitespace()
     return read_next_token();
 }
 
-// const char *read_number_str()
-// {
-//     const char *num = NULL;
-//     struct buffer *buffer = buffer_create();
-//     char c = peekc();
-
-//     if (c == '0')
-//     {
-//         char prox = nextc();
-//         prox = nextc();
-//         struct buffer *buff = buffer_create();
-//         char *stopstring;
-//         long l;
-
-//         if (prox == 'x') {
-//             LEX_GETC_IF(buff, prox, prox != ';');
-//             l = strtol(buff->data, &stopstring, 16);
-//             printf("%ld\n\n\n", l);
-//         }
-
-//         else if (prox == 'b') {
-//             return 0;
-//         }
-
-//         else {
-//             pushc(prox);
-//             pushc('0');
-//             LEX_GETC_IF(buffer, c, (c >= '0' && c <= '9'));
-//             // Finaliza a string
-//             buffer_write(buffer, 0x00);
-
-//             printf("Token: %s\n", buffer->data);
-
-//             return buffer_ptr(buffer);
-//         }
-//     }
-//     else {
-//         LEX_GETC_IF(buffer, c, (c >= '0' && c <= '9'));
-//         // Finaliza a string
-//         buffer_write(buffer, 0x00);
-
-//         printf("Token: %s\n", buffer->data);
-
-//         return buffer_ptr(buffer);
-//     }
-// }
+static long long binarioParaDecimal(const char *n_string) {
+    long long decimal = 0;
+    while (*n_string == 0 || *n_string == 1) {
+        decimal = (decimal << 1) | (*n_string - '0');
+        n_string++;
+    }
+    return decimal;
+}
 
 const char *read_number_str()
 {
@@ -247,10 +209,36 @@ const char *read_number_str()
     return buffer_ptr(buffer);
 }
 
+static bool isNumString(char c) {
+    return isdigit(c) || 
+           (c >= 'a' && c <= 'f') || 
+           (c >= 'A' && c <= 'F') ||
+           (c == 'x' || c == 'X' || c == 'b' || c == 'B');
+}
+
 unsigned long long read_number()
 {
-    const char *s = read_number_str();
-    return atoll(s);
+    char num_string[128];
+    size_t i = 0;
+
+    while (isNumString(peekc())) {
+        if (i + 1 >= sizeof(num_string)) {
+            break;
+        }
+        num_string[i++] = nextc();
+    }
+    num_string[i] = '\0';
+
+    if (strncmp(num_string, "0B", 2) == 0 || strncmp(num_string, "0b", 2) == 0) {
+        return binarioParaDecimal(num_string + 2); // Skip "0b"
+    }
+
+    int base = 10;
+    if (strncmp(num_string, "X", 2) == 0 || strncmp(num_string, "0x", 2) == 0) {
+        base = 16;
+    }
+
+    return strtoull(num_string, NULL, base);
 }
 
 struct token *token_make_number_for_value(unsigned long number)
