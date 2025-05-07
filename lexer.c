@@ -136,7 +136,7 @@ static struct token *handle_whitespace()
 
 static long long binarioParaDecimal(const char *n_string) {
     long long decimal = 0;
-    while (*n_string == 0 || *n_string == 1) {
+    while (*n_string == '0' || *n_string == '1') {
         decimal = (decimal << 1) | (*n_string - '0');
         n_string++;
     }
@@ -209,37 +209,69 @@ const char *read_number_str()
     return buffer_ptr(buffer);
 }
 
-static bool isNumString(char c) {
-    return isdigit(c) || 
-           (c >= 'a' && c <= 'f') || 
-           (c >= 'A' && c <= 'F') ||
-           (c == 'x' || c == 'X' || c == 'b' || c == 'B');
-}
-
-unsigned long long read_number()
+static unsigned long long read_number()
 {
-    char num_string[128];
-    size_t i = 0;
-
-    while (isNumString(peekc())) {
-        if (i + 1 >= sizeof(num_string)) {
-            break;
+    struct buffer *buffer = buffer_create();
+    char c = peekc();
+    
+    // Handle special prefixes
+    if (c == '0')
+    {
+        buffer_write(buffer, nextc()); // consume '0'
+        c = peekc();
+        
+        if (c == 'x' || c == 'X')  // Hexadecimal
+        {
+            buffer_write(buffer, nextc()); // consume 'x'
+            LEX_GETC_IF(buffer, c, isxdigit(c));
         }
-        num_string[i++] = nextc();
+        else if (c == 'b' || c == 'B')  // Binary
+        {
+            buffer_write(buffer, nextc()); // consume 'b'
+            LEX_GETC_IF(buffer, c, c == '0' || c == '1');
+        }
+        else  // Octal or decimal with leading zero
+        {
+            LEX_GETC_IF(buffer, c, isdigit(c));
+        }
     }
-    num_string[i] = '\0';
-
-    if (strncmp(num_string, "0B", 2) == 0 || strncmp(num_string, "0b", 2) == 0) {
-        return binarioParaDecimal(num_string + 2); // Skip "0b"
+    else  // Standard decimal
+    {
+        LEX_GETC_IF(buffer, c, isdigit(c));
     }
-
-    int base = 10;
-    if (strncmp(num_string, "X", 2) == 0 || strncmp(num_string, "0x", 2) == 0) {
-        base = 16;
+    
+    // Null terminate the buffer
+    buffer_write(buffer, 0x00);
+    
+    // Convert string to number based on prefix
+    char* str = buffer_ptr(buffer);
+    unsigned long long result = 0;
+    
+    if (strlen(str) >= 2 && str[0] == '0')
+    {
+        if (str[1] == 'x' || str[1] == 'X')
+        {
+            // Hexadecimal
+            result = strtoull(str, NULL, 16);
+        }
+        else if (str[1] == 'b' || str[1] == 'B')
+        {
+            // Binary - skip the "0b" prefix
+            result = strtoull(str + 2, NULL, 2);
+        }
     }
-
-    return strtoull(num_string, NULL, base);
+    else
+    {
+        // Decimal
+        result = strtoull(str, NULL, 10);
+    }
+    
+    // Free the buffer
+    buffer_free(buffer);
+    
+    return result;
 }
+
 
 struct token *token_make_number_for_value(unsigned long number)
 {
