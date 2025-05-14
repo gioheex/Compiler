@@ -1,6 +1,5 @@
 /* BEGIN - LAB 2 ---------------------------------*/
 #include "compiler.h"
-#include "token.c"
 #include <string.h>
 #include "helpers/vector.h"
 #include "helpers/buffer.h"
