@@ -211,29 +211,30 @@ enum {
 };
 
 // Cada nó uma parte do inputfile. 
-struct node {
-    int type;
+struct node {int type;
     int flags;
     struct pos pos;
-
     struct node_binded {
-        // Ponteiro para o body node.
-        struct node* owner;
-
-        // Ponteiro para a funcao que o no esta.
-        struct node* funtion;
+    // Ponteiro para o body node.
+    struct node* owner;
+    // Ponteiro para a funcao que o node esta.
+    struct node* funtion;
     } binded;
-
     // Estrutura similar ao token
-    union {
-        char cval;
-        const char *sval;
-        unsigned int inum;
-        unsigned long lnum;
-        unsigned long long llnum;
-        void* any;
+    union { char cval;
+    const char *sval;
+    unsigned int inum;
+    unsigned long lnum;
+    unsigned long long llnum;
+    void* any;
     };
-};
+    union { struct exp {
+    struct node* left;
+    struct node* right;
+    const char* op;
+    } exp;
+    };
+    };
 
 /* END - LAB 3 ---------------------------------*/
 
@@ -247,6 +248,27 @@ bool token_is_keyword(struct token* token, const char* value);
 struct lex_process* tokens_build_for_string(struct compile_process* compiler, const char* str);
 
 int parse(struct compile_process* process);             /*LAB3: Adicionar*/
+
+enum {
+    NODE_FLAG_INSIDE_EXPRESSION = 0b00000001
+};
+/* FUNCOES DO ARQUIVO PARSER.C */
+int parse(struct compile_process* process);
+/* FUNCOES DO ARQUIVO TOKEN.C */
+bool token_is_keyword(struct token* token, const char* value);
+bool token_is_symbol(struct token* token, const char value);
+bool discart_token(struct token* token);
+/* FUNCOES DO ARQUIVO NODE.C */
+void node_set_vector(struct vector* vec, struct vector* root_vec);
+void node_push(struct node* node);
+struct node* node_peek_or_null();
+struct node* node_peek();
+struct node* node_pop();
+struct node* node_peek_expressionable_or_null();
+bool node_is_expressionable(struct node* node);
+void make_exp_node(struct node* node_left, struct node* node_right, const char* op);
+struct node* node_create(struct node* _node);
+
 #endif
 
 
