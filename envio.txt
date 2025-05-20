@@ -1,0 +1,31 @@
+Número do grupo
+    - 1
+
+Nome completo de todos os integrantes
+
+    - Elisson Victor Costa Gama Siqueira
+    - Giovanni Leles Nogueira
+    - Silvino Padilha Silva Nogueira
+
+Número do laboratório
+
+    - Lab 4
+
+Código fonte do projeto (ou link do repositório)
+
+    - compiler.zip
+
+Descrição objetiva do que foi realizado
+
+    - Atividade 01 com arquivo de entrada (teste.c): 1234 + 6789.
+    - Feito na image.png
+     
+    - Adicao do codigo de reordenacao de arvore no parse.c
+     
+    - Inclusão do expressionable.c no Makefile
+    
+    - Testes para testar a precedência (teste_precedência teste_precedência2, teste_precedência3)
+
+Observações e pendências, se houver
+
+    - Faltando o print da arvore
