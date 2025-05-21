@@ -109,7 +109,7 @@ void parser_reorder_expression(struct node** node_out) {
     if (node->type != NODE_TYPE_EXPRESSION) return;
     if (node->exp.left != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right != NODE_TYPE_EXPRESSION) return;
 
-    if (node->exp.left != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right == NODE_TYPE_EXPRESSION) {
+    if (node->exp.left->type != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right == NODE_TYPE_EXPRESSION) {
         const char* op = node->exp.right->exp.op;
         const char* right_op = node->exp.right->exp.op;
         if (parser_left_op_has_priority(node->exp.op, right_op)) {
@@ -120,7 +120,7 @@ void parser_reorder_expression(struct node** node_out) {
     }
 }
 
-static bool parser_get_precedence_for_operator(const char* op, struct expressionable_op_precedence_group** group_out) {
+static int parser_get_precedence_for_operator(const char* op, struct expressionable_op_precedence_group** group_out) {
     *group_out = NULL;
     for (int i = 0; i < TOTAL_OPERADOR_GROUPS; i++) {
         for (int j = 0; op_precedence[i].operators[j]; j++) {
