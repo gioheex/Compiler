@@ -109,7 +109,7 @@ void parser_reorder_expression(struct node** node_out) {
     if (node->type != NODE_TYPE_EXPRESSION) return;
     if (node->exp.left != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right != NODE_TYPE_EXPRESSION) return;
 
-    if (node->exp.left->type != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right == NODE_TYPE_EXPRESSION) {
+    if (node->exp.left->type != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right->type == NODE_TYPE_EXPRESSION) {
         const char* op = node->exp.right->exp.op;
         const char* right_op = node->exp.right->exp.op;
         if (parser_left_op_has_priority(node->exp.op, right_op)) {
