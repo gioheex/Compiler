@@ -62,8 +62,7 @@ void parse_single_token_to_node()
 {
     struct token *token = token_next();
     struct node *node = NULL;
-    switch (token->type)
-    {
+    switch (token->type) {
     case TOKEN_TYPE_NUMBER:
         node = node_create(&(struct node){.type = NODE_TYPE_NUMBER, .llnum = token->llnum});
         break;
@@ -82,6 +81,40 @@ void parse_single_token_to_node()
 void parse_expressionable_for_op(struct history *history, const char *op)
 {
     parse_expressionable(history);
+}
+
+void parser_node_shift_children_left(struct node* node) {
+    assert(node->type == NODE_TYPE_EXPRESSION);
+    assert(node->exp.right->type == NODE_TYPE_EXPRESSION);
+
+    const char* right_op = node->exp.right->exp.op;
+    struct node* new_exp_left_node = node->exp.left;
+    struct node* new_exp_right_node = node->exp.right->exp.left;
+
+    make_exp_node(new_exp_left_node, new_exp_right_node, node->exp.op);
+
+    struct node* new_left_operand = node_pop();
+    struct node* new_right_operand = node->exp.right->exp.right;
+
+    node->exp.left = new_left_operand;
+    node->exp.right = new_right_operand;
+    node->exp.op = right_op;
+}
+
+void parser_reorder_expression(struct node** node_out) {
+    struct node* node = *node_out;
+    if (node->type != NODE_TYPE_EXPRESSION) return;
+    if (node->exp.left != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right != NODE_TYPE_EXPRESSION) return;
+
+    if (node->exp.left->type != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right->type == NODE_TYPE_EXPRESSION) {
+        const char* op = node->exp.right->exp.op;
+        const char* right_op = node->exp.right->exp.op;
+        if (parser_left_op_has_priority(node->exp.op, right_op)) {
+            parser_node_shift_children_left(node);
+            parser_reorder_expression(&node->exp.left);
+            parser_reorder_expression(&node->exp.right);
+        }
+    }
 }
 
 void parse_exp_normal(struct history* history) {
@@ -104,21 +137,7 @@ void parse_exp_normal(struct history* history) {
     node_push(exp_node);
 }
 
-void parser_reorder_expression(struct node** node_out) {
-    struct node* node = *node_out;
-    if (node->type != NODE_TYPE_EXPRESSION) return;
-    if (node->exp.left != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right != NODE_TYPE_EXPRESSION) return;
 
-    if (node->exp.left->type != NODE_TYPE_EXPRESSION && node->exp.right && node->exp.right->type == NODE_TYPE_EXPRESSION) {
-        const char* op = node->exp.right->exp.op;
-        const char* right_op = node->exp.right->exp.op;
-        if (parser_left_op_has_priority(node->exp.op, right_op)) {
-            parser_node_shift_children_left(node);
-            parser_reorder_expression(&node->exp.left);
-            parser_reorder_expression(&node->exp.right);
-        }
-    }
-}
 
 static int parser_get_precedence_for_operator(const char* op, struct expressionable_op_precedence_group** group_out) {
     *group_out = NULL;
@@ -147,23 +166,6 @@ static bool parser_left_op_has_priority(const char* op_left, const char* op_righ
     return precedence_left <= precedence_right;
 }
 
-void parser_node_shift_children_left(struct node* node) {
-    assert(node->type == NODE_TYPE_EXPRESSION);
-    assert(node->exp.right == NODE_TYPE_EXPRESSION);
-
-    const char* right_op = node->exp.right->exp.op;
-    struct node* new_exp_left_node = node->exp.left;
-    struct node* new_exp_right_node = node->exp.right->exp.left;
-
-    make_exp_node(new_exp_left_node, new_exp_right_node, node->exp.op);
-
-    struct node* new_left_operand = node_pop();
-    struct node* new_right_operand = node->exp.right->exp.right;
-
-    node->exp.left = new_left_operand;
-    node->exp.right = new_right_operand;
-    node->exp.op = right_op;
-}
 
 
 int parse_exp(struct history *history)
@@ -221,6 +223,36 @@ int parse_next()
     return 0;
 }
 
+void print_node_type(struct node* node) {
+    if (!node) {
+        return;
+    }
+    switch (node->type) {
+        case NODE_TYPE_NUMBER:
+            printf("Num: %u", node->inum);
+            break;
+        case NODE_TYPE_IDENTIFIER:
+            printf("Ide: %s", node->sval ? node->sval : "null");
+            break;
+        case NODE_TYPE_STRING:
+            printf("Str: %s", node->sval ? node->sval : "null");
+            break;
+        case NODE_TYPE_EXPRESSION:
+            printf("Exp: %s", node->exp.op ? node->exp.op : "null");
+            break;
+    }
+}
+
+void print_tree(struct node* node, int level) {
+    if (node != NULL) {
+        print_node_type(node);
+        printf("  Level: %i\n", level);
+        level++;
+        print_tree(node->exp.left, level);
+        print_tree(node->exp.right, level);
+    }
+}
+
 int parse(struct compile_process *process)
 { /*LAB3: Adicionar o prototipo no compiler.h */
     current_process = process;
@@ -232,6 +264,7 @@ int parse(struct compile_process *process)
     {
         node = node_peek();
         vector_push(process->node_tree_vec, &node);
+        print_tree(node, 0);
     }
     return PARSE_ALL_OK;
 }
