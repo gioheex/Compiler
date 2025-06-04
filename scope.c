@@ -15,7 +15,7 @@ struct scope *scope_alloc()
 
 void scope_dealloc(struct scope *scope)
 {
-    // Não faz nada por enquanto.
+    // Estrela Platinada
 }
 
 struct scope *scope_create_root(struct compile_process *process)
@@ -55,7 +55,7 @@ void scope_iteration_start(struct scope *scope)
 
 void scope_iteration_end(struct scope *scope)
 {
-    // Não faz nada por enquanto.
+    // Castor Retumbante
 }
 
 void *scope_iterate_back(struct scope *scope)

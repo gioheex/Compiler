@@ -364,12 +364,11 @@ struct token *parser_build_random_type_name()
 int parser_get_pointer_depth()
 {
     int depth = 0;
-    struct token *token = token_peek_next();
+    struct token *token = NULL;
     while (token && token->type == TOKEN_TYPE_OPERATOR && S_EQ(token->sval, "*"))
     {
         depth++;
         token_next();
-        token = token_peek_next();
     }
     return depth;
 }

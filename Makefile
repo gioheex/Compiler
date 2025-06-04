@@ -8,6 +8,8 @@ OBJECTS= 	./build/compiler.o \
 			./build/expressionable.o \
 			./build/helpers/buffer.o \
 			./build/helpers/vector.o
+			./build/helpers/scope.o
+			./build/helpers/symresolver.o
 INCLUDES= -I./
 
 all: ${OBJECTS}
