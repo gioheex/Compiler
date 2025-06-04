@@ -151,6 +151,15 @@ struct compile_process
     struct vector *node_tree_vec; /* LAB3: Raiz da arvore de analise*/
 
     FILE *ofile;
+    struct {
+        struct scope* root;
+        struct scope* current;
+    } scope;
+
+    struct {
+        struct vector* table;
+        struct vector* tables;
+    } symbols;
 };
 
 enum
@@ -331,6 +340,25 @@ struct datatype {
         struct node* struct_node;
         struct node* union_node;
     };
+};
+
+enum {
+    SYMBOL_TYPE_NODE,
+    SYMBOL_TYPE_NATIVE_FUNCTION,
+    SYMBOL_TYPE_UNKNOWN
+};
+
+struct symbol {
+    const char* name;
+    int type;
+    void* data;
+};
+
+struct scope {
+    int flags;
+    struct vector* entities;
+    size_t size;
+    struct scope* parent;
 };
 
 #endif

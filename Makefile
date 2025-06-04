@@ -43,6 +43,12 @@ all: ${OBJECTS}
 ./build/helpers/vector.o: ./helpers/vector.c
 	gcc ./helpers/vector.c ${INCLUDES} -o ./build/helpers/vector.o -g -c
 
+./build/helpers/scope.o: ./helpers/scope.c
+	gcc ./helpers/scope.c ${INCLUDES} -o ./build/helpers/scope.o -g -c
+
+./build/helpers/symresolver.o: ./helpers/symresolver.c
+	gcc ./helpers/symresolver.c ${INCLUDES} -o ./build/helpers/symresolver.o -g -c
+
 clean:
 	rm ./main
 	rm -rf ${OBJECTS}
