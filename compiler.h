@@ -268,6 +268,7 @@ int parse(struct compile_process *process);
 /* FUNCOES DO ARQUIVO TOKEN.C */
 bool token_is_keyword(struct token *token, const char *value);
 bool token_is_symbol(struct token *token, const char value);
+bool token_is_operator(struct token* token, const char* val);
 bool discart_token(struct token *token);
 
 /* FUNCOES DO ARQUIVO NODE.C */
@@ -325,6 +326,7 @@ enum {
     DATATYPE_EXPECT_STRUCT
 };
 
+
 struct datatype {
     int flags;
     // EX: long, int, float, etc.
@@ -358,6 +360,28 @@ struct scope {
     int flags;
     struct vector* entities;
     size_t size;
+    struct scope* parent;
+};
+
+enum {
+    SYMBOL_TYPE_NODE,
+    SYMBOL_TYPE_NATIVE_FUNCTION,
+    SYMBOL_TYPE_UNKNOWN
+};
+
+struct symbol {
+    const char* name;
+    int type;
+    void* data;
+};
+
+struct scope {
+    int flags;
+    // void*
+    struct vector* entities;
+    // Quantidade total de bytes do escopo.
+    size_t size;
+    // NULL se nao tiver pai.
     struct scope* parent;
 };
 

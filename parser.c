@@ -50,6 +50,10 @@ static struct token *token_next()
     parser_last_token = next_token;
     return vector_peek(current_process->token_vec);
 }
+static bool token_next_is_operator(const char* op) { // LAB5 - Parte 2
+    struct token* token = token_peek_next();
+    return token_is_operator(token, op);
+    }
 
 static struct token *token_peek_next()
 {

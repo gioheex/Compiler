@@ -16,3 +16,6 @@ bool discart_token(struct token *token)
            (token->type == TOKEN_TYPE_COMMENT) ||
            token_is_symbol(token, '\\');
 }
+bool token_is_operator(struct token* token, const char* val) {
+    return token && token->type == TOKEN_TYPE_OPERATOR && S_EQ(token->sval, val);
+    }
