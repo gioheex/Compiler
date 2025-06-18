@@ -50,10 +50,11 @@ static struct token *token_next()
     parser_last_token = next_token;
     return vector_peek(current_process->token_vec);
 }
-static bool token_next_is_operator(const char* op) { // LAB5 - Parte 2
-    struct token* token = token_peek_next();
+static bool token_next_is_operator(const char *op)
+{ // LAB5 - Parte 2
+    struct token *token = token_peek_next();
     return token_is_operator(token, op);
-    }
+}
 
 static struct token *token_peek_next()
 {
@@ -351,19 +352,39 @@ int parser_datatype_expected_for_type_string(const char *str)
     return DATATYPE_EXPECT_PRIMITIVE;
 }
 
-struct token *parser_build_random_type_name()
+char random_letter()
 {
-    char tmp_name[25];
-    sprintf(tmp_name, "customtypename_%i", parser_get_random_type_index());
-    char *sval = malloc(sizeof(tmp_name));
-    strncpy(sval, tmp_name, sizeof(tmp_name));
+    return 'a' + rand() % 26;
+}
+
+struct token *random_name_generator()
+{
+    static const int NAME_LENGTH = 20;  
+    char nome[NAME_LENGTH + 1];
+
+    for (int i = 0; i < NAME_LENGTH; i++) {
+        nome[i] = random_letter();
+    }
+    nome[NAME_LENGTH] = '\0';  
+
+    char *sval = malloc(NAME_LENGTH + 1);
+    if (!sval) {
+        return NULL;  // handle malloc failure
+    }
+    strcpy(sval, nome);
 
     struct token *token = calloc(1, sizeof(struct token));
+    if (!token) {
+        free(sval);
+        return NULL;
+    }
+
     token->type = TOKEN_TYPE_IDENTIFIER;
     token->sval = sval;
 
     return token;
 }
+
 
 int parser_get_pointer_depth()
 {
@@ -487,7 +508,7 @@ void parse_datatype_type(struct datatype *dtype)
         }
         else
         {
-            datatype_token = parser_build_random_type_name();
+            datatype_token = random_name_generator();
             dtype->flags |= DATATYPE_FLAG_IS_STRUCT_UNION_NO_NAME;
         }
     }
@@ -551,9 +572,11 @@ void parse_variable_function_or_struct_union(struct history *history)
     parse_datatype(&dtype);
 }
 
-void parse_keyword(struct history *history) {
-    struct token* token = token_peek_next();
-    if (is_keyword_variable_modifier(token->sval) || keyword_is_datatype(token->sval)) {
+void parse_keyword(struct history *history)
+{
+    struct token *token = token_peek_next();
+    if (is_keyword_variable_modifier(token->sval) || keyword_is_datatype(token->sval))
+    {
         parse_variable_function_or_struct_union(history);
         return;
     }
