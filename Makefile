@@ -7,9 +7,9 @@ OBJECTS= 	./build/compiler.o \
 			./build/node.o \
 			./build/expressionable.o \
 			./build/helpers/buffer.o \
-			./build/helpers/vector.o
-			./build/helpers/scope.o
-			./build/helpers/symresolver.o
+			./build/helpers/vector.o \
+			./build/scope.o \
+			./build/symresolver.o 
 INCLUDES= -I./
 
 all: ${OBJECTS}
@@ -45,11 +45,11 @@ all: ${OBJECTS}
 ./build/helpers/vector.o: ./helpers/vector.c
 	gcc ./helpers/vector.c ${INCLUDES} -o ./build/helpers/vector.o -g -c
 
-./build/helpers/scope.o: ./helpers/scope.c
-	gcc ./helpers/scope.c ${INCLUDES} -o ./build/helpers/scope.o -g -c
+./build/scope.o: ./scope.c
+	gcc ./scope.c ${INCLUDES} -o ./build/scope.o -g -c
 
-./build/helpers/symresolver.o: ./helpers/symresolver.c
-	gcc ./helpers/symresolver.c ${INCLUDES} -o ./build/helpers/symresolver.o -g -c
+./build/symresolver.o: ./symresolver.c
+	gcc ./symresolver.c ${INCLUDES} -o ./build/symresolver.o -g -c
 
 clean:
 	rm ./main

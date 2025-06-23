@@ -206,6 +206,23 @@ enum
     NODE_FLAG_INSIDE_EXPRESSION = 0b00000001
 };
 
+struct datatype {
+    int flags;
+    // EX: long, int, float, etc.
+    int type;
+    const char* type_str;
+    // EX: long int, sendo int o secundário.
+    struct datatype* datatype_secondary;
+    // Tamanho do datatype. EX: long tem 8 bytes.
+    size_t size;
+    // Quantidades de ponteiros alinhados. Ex: int** a, pointer_depth == 2.
+    int pointer_depth;
+    union {
+        struct node* struct_node;
+        struct node* union_node;
+    };
+};
+
 struct node
 {
     int type;
@@ -236,6 +253,14 @@ struct node
             struct node *right;
             const char *op;
         } exp;
+        struct var { 
+            struct datatype type;
+            const char* name;
+            struct node* val;
+        } var;
+        struct varlist {// Lista de variaveis struct node*
+            struct vector* list;
+        } var_list;
     };
 };
 
@@ -326,24 +351,6 @@ enum {
     DATATYPE_EXPECT_STRUCT
 };
 
-
-struct datatype {
-    int flags;
-    // EX: long, int, float, etc.
-    int type;
-    const char* type_str;
-    // EX: long int, sendo int o secundário.
-    struct datatype* datatype_secondary;
-    // Tamanho do datatype. EX: long tem 8 bytes.
-    size_t size;
-    // Quantidades de ponteiros alinhados. Ex: int** a, pointer_depth == 2.
-    int pointer_depth;
-    union {
-        struct node* struct_node;
-        struct node* union_node;
-    };
-};
-
 enum {
     SYMBOL_TYPE_NODE,
     SYMBOL_TYPE_NATIVE_FUNCTION,
@@ -360,28 +367,6 @@ struct scope {
     int flags;
     struct vector* entities;
     size_t size;
-    struct scope* parent;
-};
-
-enum {
-    SYMBOL_TYPE_NODE,
-    SYMBOL_TYPE_NATIVE_FUNCTION,
-    SYMBOL_TYPE_UNKNOWN
-};
-
-struct symbol {
-    const char* name;
-    int type;
-    void* data;
-};
-
-struct scope {
-    int flags;
-    // void*
-    struct vector* entities;
-    // Quantidade total de bytes do escopo.
-    size_t size;
-    // NULL se nao tiver pai.
     struct scope* parent;
 };
 
