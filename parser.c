@@ -213,13 +213,13 @@ static bool parser_left_op_has_priority(const char *op_left, const char *op_righ
     // Igual -> Confere associatividade
     if (group_left && group_left->associativity == ASSOCIATIVITY_LEFT_TO_RIGTH)
     {
-        return false;
+        return true;
     }
 
     // Associatividade direita -> esquerda prioridade
     if (group_left && group_left->associativity == ASSOCIATIVITY_RIGHT_TO_LEFT)
     {
-        return true;
+        return false;
     }
 
     return false;
